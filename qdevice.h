@@ -8,13 +8,24 @@
 #include <QSpinBox>
 #include <QPlainTextEdit>
 
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+
 class QDevice : public QGroupBox
 {
     Q_OBJECT
 public:
-    explicit QDevice(QWidget *parent = nullptr);
+    explicit QDevice(int deviceID, QWidget *parent = nullptr);
+    void SetID(int id);
+    void SetRemoveButtonCallback(void (*callback)());
+    void RemoveDevice();
+
+signals:
+    void removed(QDevice* dev);
 
 private:
+    QPushButton* removeButton;
+
     QSpinBox* idSpinBox;
     QPlainTextEdit* portNamePlainTextEdit;
     QSpinBox* currentSpinBox;
@@ -26,8 +37,6 @@ private:
     QLabel* currentLabel;
     QLabel* frequencyLabel;
     QLabel* durationLabel;
-
-signals:
 
 };
 

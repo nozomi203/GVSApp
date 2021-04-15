@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "qdevice.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,19 +13,36 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::AddDevice(){
+    QDevice* dev = new QDevice(deviceList.count(), ui->centralwidget);
+    connect(dev, SIGNAL(removed(QDevice*)), this, SLOT(RemoveDevice(QDevice*)));
+    dev->show();
+    deviceList.append(dev);
+    if(deviceList.count() == MAX_DEVICE_COUNT){
+        ui->AddDeviceButton->setDisabled(true);
+    }
+}
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::RemoveDevice(QDevice* device){
+    deviceList.removeOne(device);
+    ui->AddDeviceButton->setDisabled(false);
+    for(int i = 0; i < deviceList.count(); i++){
+        deviceList[i]->SetID(i);
+    }
+}
+
+void MainWindow::on_AddDeviceButton_clicked()
 {
-    ui->label->setText("HOGE");
-    delete ui->pushButton;
-    /*
-    QLabel* l = new QLabel(window());
-    l->setText("GUFAA");
-    l->move(100,100);
-    l->show();
-    */
+    AddDevice();
+}
 
-    QDevice* qd = new QDevice(window());
-    qd->move(10,10);
-    qd->show();
+
+void MainWindow::on_StartButton_clicked()
+{
+
+}
+
+void MainWindow::on_StopButton_clicked()
+{
+
 }

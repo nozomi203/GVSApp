@@ -1,10 +1,12 @@
 #include "qdevice.h"
+#include <QtCore/QDebug>
 
-QDevice::QDevice(QWidget *parent) : QGroupBox(parent)
+QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
 {
-    this->setTitle("Device 0");
-    this->setFixedSize(180, 240);
+    qDebug() << "Hello Device.";
     //Widget生成
+    removeButton = new QPushButton(this);
+
     idSpinBox = new QSpinBox(this);
     portNamePlainTextEdit = new QPlainTextEdit(this);
     currentSpinBox = new QSpinBox(this);
@@ -18,21 +20,30 @@ QDevice::QDevice(QWidget *parent) : QGroupBox(parent)
     durationLabel = new QLabel(this);
 
     //移動
-    idSpinBox->setGeometry(100, 37, 70, 22);
-    portNamePlainTextEdit->setGeometry(100, 67, 70, 22);
-    currentSpinBox->setGeometry(100, 97, 70, 22);
-    frequencySpinBox->setGeometry(100, 127, 70, 22);
-    durationSpinBox->setGeometry(100, 157, 70, 22);
+    this->setFixedSize(180, 240);
+    this->SetID(deviceID);
 
-    idLabel->setGeometry(10, 40, 80, 15);
-    portNameLabel->setGeometry(10, 70, 80, 15);
-    currentLabel->setGeometry(10, 100, 80, 15);
-    frequencyLabel->setGeometry(10, 120, 80, 15);
-    durationLabel->setGeometry(10, 150, 80, 15);
+    removeButton->setGeometry(100,10,70,28);
+
+    idSpinBox->setGeometry(100, 67, 70, 22);
+    portNamePlainTextEdit->setGeometry(100, 97, 70, 22);
+    currentSpinBox->setGeometry(100, 127, 70, 22);
+    frequencySpinBox->setGeometry(100, 157, 70, 22);
+    durationSpinBox->setGeometry(100, 187, 70, 22);
+
+    idLabel->setGeometry(10, 70, 80, 15);
+    portNameLabel->setGeometry(10, 100, 80, 15);
+    currentLabel->setGeometry(10, 130, 80, 15);
+    frequencyLabel->setGeometry(10, 160, 80, 15);
+    durationLabel->setGeometry(10, 190, 80, 15);
 
     //コールバック設定
-
+    connect(removeButton, &QPushButton::clicked, this, [=](){
+            RemoveDevice();
+    });
     //値の設定
+    removeButton->setText("Remove");
+
     idSpinBox->setValue(0);
     portNamePlainTextEdit->setPlainText("COM0");
     currentSpinBox->setValue(500);
@@ -44,4 +55,15 @@ QDevice::QDevice(QWidget *parent) : QGroupBox(parent)
     currentLabel->setText("Current:");
     frequencyLabel->setText("Frequency:");
     durationLabel->setText("Duration:");
+}
+
+void QDevice::SetID(int id){
+    this->setTitle("Device " + QString::number(id));
+    this->move(10 + 190 * id, 60);
+}
+
+void QDevice::RemoveDevice(){
+    qDebug() << "Remove Device.";
+    emit removed(this);
+    delete this;
 }

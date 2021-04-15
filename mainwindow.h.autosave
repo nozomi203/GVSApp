@@ -22,6 +22,10 @@ private slots:
     void RemoveDevice(QDevice* device);
 
 
+    void on_StartButton_clicked();
+    
+    void on_StopButton_clicked();
+    
 private:
     Ui::MainWindow *ui;
     QList<QDevice*> deviceList;
