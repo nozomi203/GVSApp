@@ -1,11 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QtCore/QDebug>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    isConnect = false;
 }
 
 MainWindow::~MainWindow()
@@ -31,6 +34,54 @@ void MainWindow::RemoveDevice(QDevice* device){
     }
 }
 
+void MainWindow::Connect(){
+    if(isConnect) return;
+    isConnect = true;
+    qDebug() << "Connect.";
+
+    foreach(auto &dev, deviceList){
+        QString portName = dev->GetPortName();
+        //まだ開いていないポートか確認
+        bool portExist = true;
+        if(!nameToPort.contains(portName)){
+            portExist = false;
+            //名前の一致するポートを探す
+            foreach(auto &serialPortInfo, QSerialPortInfo::availablePorts()){
+                if(serialPortInfo.portName() == portName){
+                    portExist = true;
+                    QSerialPort* serialPort = new QSerialPort(serialPortInfo);
+                    //ポートオープン
+                    serialPort->open(QIODevice::ReadWrite);
+                    qDebug() << portName << " added.";
+                    nameToPort[portName] = serialPort;
+                    break;
+                }
+            }
+        }
+        //ポートが無かったらエラー表示
+        dev->SetPortExist(portExist);
+        //デバイス接続
+        if(portExist){
+            dev->Connect(nameToPort[portName]);
+        }
+    }
+}
+void MainWindow::Disconnect(){
+    if(!isConnect) return;
+    isConnect = false;
+    qDebug() << "Disconnect.";
+
+    //デバイスの停止
+    foreach(auto &dev, deviceList){
+        dev->Disconnect();
+    }
+    //ポートのクローズ
+    foreach(auto serialPort, nameToPort.values()){
+        serialPort->close();
+    }
+    nameToPort.clear();
+}
+
 void MainWindow::on_AddDeviceButton_clicked()
 {
     AddDevice();
@@ -39,10 +90,10 @@ void MainWindow::on_AddDeviceButton_clicked()
 
 void MainWindow::on_StartButton_clicked()
 {
-
+    Connect();
 }
 
 void MainWindow::on_StopButton_clicked()
 {
-
+    Disconnect();
 }

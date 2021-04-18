@@ -19,11 +19,18 @@ public:
     void SetID(int id);
     void SetRemoveButtonCallback(void (*callback)());
     void RemoveDevice();
-
+    void Connect(QSerialPort *serialPort);
+    void Disconnect();
+    QString GetPortName();
+    void SetPortExist(bool portExist);
 signals:
     void removed(QDevice* dev);
 
 private:
+    void SetStimulateState(bool isStimulate);
+    void SendGVSParam(int current, int frequency);
+    void SendGVSParam();
+
     QPushButton* removeButton;
 
     QSpinBox* idSpinBox;
@@ -38,6 +45,13 @@ private:
     QLabel* frequencyLabel;
     QLabel* durationLabel;
 
+    QLabel* portErrorLabel;
+
+    QSerialPort* port;
+
+    QLabel* stimulateStateLabel;
+
+    bool isStimulate;
 };
 
 #endif // QDEVICE_H
