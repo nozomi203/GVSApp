@@ -12,19 +12,21 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     currentSpinBox = new QSpinBox(this);
     frequencySpinBox = new QSpinBox(this);
     durationSpinBox = new QSpinBox(this);
+    waveFormComboBox = new QComboBox(this);
 
     idLabel = new QLabel(this);
     portNameLabel = new QLabel(this);
     currentLabel = new QLabel(this);
     frequencyLabel = new QLabel(this);
     durationLabel = new QLabel(this);
+    waveFormLabel = new QLabel(this);
 
     portErrorLabel = new QLabel(this);
 
     stimulateStateLabel = new QLabel(this);
 
     //移動
-    this->setFixedSize(180, 240);
+    this->setFixedSize(180, 270);
     this->SetID(deviceID);
 
     removeButton->setGeometry(100,10,70,28);
@@ -34,16 +36,23 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     currentSpinBox->setGeometry(90, 127, 80, 22);
     frequencySpinBox->setGeometry(90, 157, 80, 22);
     durationSpinBox->setGeometry(90, 187, 80, 22);
+    waveFormComboBox->setGeometry(90, 217, 80, 22);
 
     idLabel->setGeometry(10, 70, 80, 15);
     portNameLabel->setGeometry(10, 100, 80, 15);
     currentLabel->setGeometry(10, 130, 80, 15);
     frequencyLabel->setGeometry(10, 160, 80, 15);
     durationLabel->setGeometry(10, 190, 80, 15);
+    waveFormLabel->setGeometry(10, 220, 80, 15);
 
     portErrorLabel->setGeometry(10, 40, 160,15);
 
-    stimulateStateLabel->setGeometry(90, 217, 80, 15);
+    stimulateStateLabel->setGeometry(90, 247, 80, 15);
+
+    //ComboBoxの初期化
+    foreach(auto waveForm, WaveFormMap.keys()){
+        waveFormComboBox->addItem(waveForm);
+    }
 
     //コールバック設定
     connect(removeButton, &QPushButton::clicked, this, [=](){
@@ -52,6 +61,10 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     //値の設定
     removeButton->setText("Remove");
 
+    idSpinBox->setMaximum(3);
+    currentSpinBox->setMaximum(4095);
+    frequencySpinBox->setMaximum(200);
+    durationSpinBox->setMaximum(180);
     idSpinBox->setValue(0);
     portNamePlainTextEdit->setPlainText("COM0");
     currentSpinBox->setValue(500);
@@ -63,6 +76,7 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     currentLabel->setText("Current:");
     frequencyLabel->setText("Frequency:");
     durationLabel->setText("Duration:");
+    waveFormLabel->setText("WaveForm:");
 
     portErrorLabel->setText("Port doesn't exist.");
     QPalette palette = portErrorLabel->palette();
@@ -87,11 +101,24 @@ void QDevice::RemoveDevice(){
 }
 
 void QDevice::Connect(QSerialPort* serialPort){
-    qDebug() << portNamePlainTextEdit->toPlainText();
+    qDebug() << portNamePlainTextEdit->toPlainText() << "Connect.";
     port = serialPort;
+    SetStimulateState(true);
+    //刺激開始
+    SendGVSParam();
+    //制限時間の設定
+    stimTimer = new QTimer(this);
+    //コールバックは一度キリ
+    stimTimer->setSingleShot(true);
+    connect(stimTimer, &QTimer::timeout, this, [=](){
+        StopGVS();
+    });
+    //タイマー開始
+    stimTimer->start(durationSpinBox->value() * 1000);
 }
-void QDevice::Disconnect(){
 
+void QDevice::Disconnect(){
+    StopGVS();
 }
 
 QString QDevice::GetPortName(){
@@ -113,20 +140,18 @@ void QDevice::SetStimulateState(bool b){
         QPalette palette = stimulateStateLabel->palette();
         palette.setColor(QPalette::Foreground, QColor("#00FF00"));
         stimulateStateLabel->setPalette(palette);
-        stimulateStateLabel->hide();
     }else{
         stimulateStateLabel->setText("Stay");
         QPalette palette = stimulateStateLabel->palette();
         palette.setColor(QPalette::Foreground, QColor("#FF0000"));
         stimulateStateLabel->setPalette(palette);
-        stimulateStateLabel->hide();
     }
 }
 
 void QDevice::SendGVSParam(){
-    SendGVSParam(currentSpinBox->value(), frequencySpinBox->value());
+    SendGVSParam(currentSpinBox->value(), frequencySpinBox->value(), WaveFormMap[waveFormComboBox->currentText()]);
 }
-void QDevice::SendGVSParam(int current, int frequency, int mode){
+void QDevice::SendGVSParam(int current, int frequency, int waveForm){
     char dat1, dat2, dat3, dat4;
     int channel = idSpinBox->value();
     //dat1
@@ -157,10 +182,16 @@ void QDevice::SendGVSParam(int current, int frequency, int mode){
     if ((frequency & 0x02) != 0) dat3 += 2;
     if ((frequency & 0x01) != 0) dat3 += 1;
     //dat4
-    if ((mode & 0x04) != 0) dat4 += 128;
-    if ((mode & 0x02) != 0) dat4 += 64;
-    if ((mode & 0x01) != 0) dat4 += 32;
+    if ((waveForm & 0x04) != 0) dat4 += 128;
+    if ((waveForm & 0x02) != 0) dat4 += 64;
+    if ((waveForm & 0x01) != 0) dat4 += 32;
 
     char buffer[5] = {71, dat1, dat2, dat3, dat4};
-    port->write(buffer);
+    //port->write(buffer);
+}
+
+void QDevice::StopGVS(){
+    qDebug() << "Stop GVS";
+    SetStimulateState(false);
+    SendGVSParam(0,0,0);
 }

@@ -36,7 +36,6 @@ void MainWindow::RemoveDevice(QDevice* device){
 
 void MainWindow::Connect(){
     if(isConnect) return;
-    isConnect = true;
     qDebug() << "Connect.";
 
     foreach(auto &dev, deviceList){
@@ -62,8 +61,10 @@ void MainWindow::Connect(){
         dev->SetPortExist(portExist);
         //デバイス接続
         if(portExist){
+            isConnect = true;
             dev->Connect(nameToPort[portName]);
         }
+        dev->Connect(nullptr);
     }
 }
 void MainWindow::Disconnect(){
