@@ -23,8 +23,15 @@ public:
     void RemoveDevice();
     void Connect(QSerialPort *serialPort);
     void Disconnect();
-    QString GetPortName();
-    void SetPortExist(bool portExist);
+
+    int Channel();
+    QString PortName();
+    int Current();
+    int Frequency();
+    int Duration();
+    int WaveForm();
+    bool IsStimulate();
+
     //波形を増やしたいときはこいつを編集
     const QMap<QString, int> WaveFormMap{
         {"Direct", 3},
@@ -36,20 +43,20 @@ signals:
 
 private:
     void SetStimulateState(bool isStimulate);
+    void SetPortExist(bool portExist);
     void SendGVSParam(int current, int frequency, int waveForm);
     void SendGVSParam();
-    void StopGVS();
 
     QPushButton* removeButton;
 
-    QSpinBox* idSpinBox;
+    QSpinBox* channelSpinBox;
     QPlainTextEdit* portNamePlainTextEdit;
     QSpinBox* currentSpinBox;
     QSpinBox* frequencySpinBox;
     QSpinBox* durationSpinBox;
     QComboBox* waveFormComboBox;
 
-    QLabel* idLabel;
+    QLabel* channelLabel;
     QLabel* portNameLabel;
     QLabel* currentLabel;
     QLabel* frequencyLabel;

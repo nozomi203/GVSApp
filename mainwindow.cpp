@@ -19,6 +19,7 @@ MainWindow::~MainWindow()
 void MainWindow::AddDevice(){
     QDevice* dev = new QDevice(deviceList.count(), ui->centralwidget);
     connect(dev, SIGNAL(removed(QDevice*)), this, SLOT(RemoveDevice(QDevice*)));
+    connect(dev, SIGNAL(stimEnd()), this, SLOT(DetectStimEnd()));
     dev->show();
     deviceList.append(dev);
     if(deviceList.count() == MAX_DEVICE_COUNT){
@@ -27,11 +28,21 @@ void MainWindow::AddDevice(){
 }
 
 void MainWindow::RemoveDevice(QDevice* device){
+    qDebug() << "Remove device.";
     deviceList.removeOne(device);
     ui->AddDeviceButton->setDisabled(false);
     for(int i = 0; i < deviceList.count(); i++){
         deviceList[i]->SetID(i);
     }
+}
+
+void MainWindow::DetectStimEnd(){
+    foreach(auto &dev, deviceList){
+        if(dev->GetIsStimulate()){
+            return;
+        }
+    }
+    Disconnect();
 }
 
 void MainWindow::Connect(){
@@ -57,14 +68,16 @@ void MainWindow::Connect(){
                 }
             }
         }
-        //ポートが無かったらエラー表示
-        dev->SetPortExist(portExist);
+
+        QSerialPort* serialPort = nullptr;
         //デバイス接続
         if(portExist){
             isConnect = true;
-            dev->Connect(nameToPort[portName]);
+            serialPort = nameToPort[portName];
         }
-        dev->Connect(nullptr);
+        //delete later
+        isConnect = true;
+        dev->Connect(serialPort);
     }
 }
 void MainWindow::Disconnect(){

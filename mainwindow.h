@@ -24,10 +24,11 @@ public:
 
 private slots:
     void on_AddDeviceButton_clicked();
-    void RemoveDevice(QDevice* device);
-
     void on_StartButton_clicked();
     void on_StopButton_clicked();
+
+    void RemoveDevice(QDevice* device);
+    void DetectStimEnd();
 
 private:
     Ui::MainWindow *ui;
