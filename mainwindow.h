@@ -2,10 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "qdevice.h"
-
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
+
+#include "qdevice.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,6 +29,7 @@ private slots:
 
     void RemoveDevice(QDevice* device);
     void DetectStimEnd();
+    void FindTargetPort(QDevice* device);
 
 private:
     Ui::MainWindow *ui;

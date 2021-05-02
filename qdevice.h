@@ -6,7 +6,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSpinBox>
-#include <QPlainTextEdit>
+#include <QLineEdit>
 #include <QComboBox>
 #include <QTimer>
 
@@ -19,9 +19,10 @@ class QDevice : public QGroupBox
 public:
     explicit QDevice(int deviceID, QWidget *parent = nullptr);
     void SetID(int id);
+    void SetPort(QSerialPort* serialPort);
     void SetRemoveButtonCallback(void (*callback)());
     void RemoveDevice();
-    void Connect(QSerialPort *serialPort);
+    void Connect();
     void Disconnect();
 
     int Channel();
@@ -31,6 +32,7 @@ public:
     int Duration();
     int WaveForm();
     bool IsStimulate();
+    bool IsAvailable();
 
     //波形を増やしたいときはこいつを編集
     const QMap<QString, int> WaveFormMap{
@@ -40,17 +42,21 @@ public:
 signals:
     void removed(QDevice* dev);
     void stimEnd();
+    void portNameChanged(QDevice* dev);
 
 private:
     void SetStimulateState(bool isStimulate);
-    void SetPortExist(bool portExist);
+    void SetPortExist(bool b);
+    void SetIsAvailable(bool b);
+    void AskDeviceState();
+    void ReceiveDeviceState();
     void SendGVSParam(int current, int frequency, int waveForm);
     void SendGVSParam();
 
     QPushButton* removeButton;
 
     QSpinBox* channelSpinBox;
-    QPlainTextEdit* portNamePlainTextEdit;
+    QLineEdit* portNameLineEdit;
     QSpinBox* currentSpinBox;
     QSpinBox* frequencySpinBox;
     QSpinBox* durationSpinBox;
@@ -64,12 +70,14 @@ private:
     QLabel* waveFormLabel;
 
     QLabel* portErrorLabel;
+    QLabel* portAvailableLabel;
 
     QSerialPort* port;
 
     QLabel* stimulateStateLabel;
 
     bool isStimulate;
+    bool isAvailable;
 
     QTimer* stimTimer;
 };
