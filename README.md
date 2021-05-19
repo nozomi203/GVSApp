@@ -1,5 +1,11 @@
 # GVSApp
 
-1.GvsApp/SeeeduinoCCC以下のプログラムを電気刺激装置のマイコンに書き込み（プログラム内の変数g_Chをデバイスごとに書き換え）
+1.GvsApp/SeeeduinoCCC以下のプログラムを電気刺激装置のマイコンに書き込む（プログラム内の変数g_Chをデバイスごとに書き換え）
 
-2.GvsApp/build/GVSApp/GVS.exeを実行．「Add Device」を押し，表示されたボックス内のIDを1.で書き換えたg_Chに合わせる．また，PortNameもデバイスが接続されているポートに合わせて書き換える．Current,Frequency,Duration,WaveFormをそれぞれ調整したらStartで刺激開始．
+2.
+GvsApp/build/GVSApp/GVS.exeを実行．「Add Device」を押し，表示されたボックス内のIDを1.で書き換えたg_Chに合わせる．また，PortNameもデバイスが接続されているポートに合わせて書き換える．Current,Frequency,Duration,WaveFormをそれぞれ調整したらStartで刺激開始．
+
+注意点
+・ポート名が間違っている場合はその旨が表示されるので正しいポート名に直す．
+・ポート名が合っていてもデバイスからの応答がない場合，ボックスの左下に「No device」と表示される．この場合はTeratarm等を駆使してデバッグする．
+・予期せぬバグによって電流が止まらなくなる可能性は十分にありうるので，そうなったらデバイスの給電を抜いて強制的に停止させる．
