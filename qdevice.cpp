@@ -213,11 +213,12 @@ void QDevice::AskDeviceState(){
     //安否確認
     qDebug() << "Send message.";
     //Cはマジックナンバー
-    port->write("C");
+    port->write("C", 1);
 }
 void QDevice::ReceiveDeviceState(){
     if(sender() == port){
         QString data = port->readAll();
+        qDebug() << "Received: " << data;
         if(data == QString::number(Channel())){
             qDebug() << "Device is alive.";
             SetIsAvailable(true);
@@ -264,5 +265,5 @@ void QDevice::SendGVSParam(int current, int frequency, int waveForm){
     if ((waveForm & 0x01) != 0) dat4 += 32;
 
     char buffer[5] = {71, dat1, dat2, dat3, dat4};
-    port->write(buffer);
+    port->write(buffer, sizeof(buffer));
 }

@@ -30,7 +30,7 @@ float negacon(float phase){
 float (*waves[])(float) = {bipole, posimono, negamono, posicon, negacon, bipole, bipole, bipole};
 
 //const int analogOutPin = A0; // Analog output pin that the LED is attached to
-int g_Ch = 2
+int g_Ch = 0;
 int g_Val = 0;//0-255
 int g_Freq = 0;//0-1023
 float (*g_Wave)(float)= bipole;
@@ -77,27 +77,36 @@ void loop()
       delay(1);
       Serial.write("Dat0 Receive:");
       Serial.print(Dat0);
+      Serial.write("\r\n");
       if(Dat0 == 71){
         digitalWrite(LED_BUILTIN, LOW);
         while(Serial1.available()<=0);
         Dat1 = Serial1.read();
         Serial.write("Dat1 Receive:");
         Serial.print(Dat1);
+        Serial.write("\r\n");
         while(Serial1.available()<=0);
         Dat2 = Serial1.read();
         Serial.write("Dat2 Receive:");
         Serial.print(Dat2);
+        Serial.write("\r\n");
         while(Serial1.available()<=0);
         Dat3 = Serial1.read();
         Serial.write("Dat3 Receive:");
         Serial.print(Dat3);
+        Serial.write("\r\n");
         while(Serial1.available()<=0);
         Dat4 = Serial1.read();
         Serial.write("Dat4 Receive:");
         Serial.print(Dat4);
+        Serial.write("\r\n");
         digitalWrite(LED_BUILTIN, HIGH);
   
         ConvertChtoBin(Dat1,Dat2, Dat3, Dat4);
+      }
+      if(Dat0 == 67){
+        Serial.write("Alive.\r\n");
+        Serial1.print(g_Ch);
       }
     }
     //update
@@ -146,6 +155,7 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
         g_Val = (int) (current / 16);
         Serial.write("Current:");
         Serial.print(g_Val);
+        Serial.write("\r\n");
 
         if((dat2 & 0x02) != 0) frequency = frequency + 512;
         if((dat2 & 0x01) != 0) frequency = frequency + 256;
@@ -161,7 +171,8 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
         g_Freq = frequency;
         Serial.write("Frequency:");
         Serial.print(g_Freq);
-
+        Serial.write("\r\n");
+        
         if((dat4 & 0x80) != 0) wave = wave + 4;
         if((dat4 & 0x40) != 0) wave = wave + 2;
         if((dat4 & 0x20) != 0) wave = wave + 1;
