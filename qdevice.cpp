@@ -1,4 +1,4 @@
-#include "qdevice.h"
+ #include "qdevice.h"
 #include <QtCore/QDebug>
 
 QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)

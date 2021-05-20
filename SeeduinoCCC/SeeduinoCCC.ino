@@ -130,10 +130,6 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
     if((dat1 & 0x40) != 0) ch = ch + 1;
 
     if(g_Ch == ch){
-
-        t = 0;
-        te = micros()/ (float)1000000;
-        ts = te;
         
         int current = 0;
         int frequency = 0;
@@ -178,6 +174,13 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
         if((dat4 & 0x20) != 0) wave = wave + 1;
 
         g_Wave = waves[wave];
+
+        //タイマーリセット
+        if((dat4 & 0x10) != 0){
+          t = 0;
+          te = micros()/ (float)1000000;
+          ts = te;
+        }
     }
 
 }
