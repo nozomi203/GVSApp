@@ -33,6 +33,7 @@ public:
     int WaveForm();
     bool IsStimulate();
     bool IsAvailable();
+    bool IsPortExist();
 
     //波形を増やしたいときはこいつを編集
     const QMap<QString, int> WaveFormMap{
@@ -46,7 +47,7 @@ signals:
 
 private:
     void SetStimulateState(bool isStimulate);
-    void SetPortExist(bool b);
+    void UpdatePortLabel();
     void SetIsAvailable(bool b);
     void AskDeviceState();
     void ReceiveDeviceState();

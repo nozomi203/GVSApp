@@ -80,7 +80,7 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     frequencySpinBox->setValue(80);
     durationSpinBox->setValue(10);
 
-    channelLabel->setText("ID:");
+    channelLabel->setText("Channel:");
     portNameLabel->setText("PortName:");
     currentLabel->setText("Current:");
     frequencyLabel->setText("Frequency:");
@@ -113,10 +113,9 @@ void QDevice::SetID(int id){
 }
 void QDevice::SetPort(QSerialPort* serialPort){
     port = serialPort;
-    bool portExist = port != nullptr;
-    SetPortExist(portExist);
+    UpdatePortLabel();
     SetIsAvailable(false);
-    if(portExist){
+    if(IsPortExist()){
         //デバイスの状態を確認
         AskDeviceState();
         connect(port, &QSerialPort::readyRead, this, [=]{
@@ -177,8 +176,11 @@ bool QDevice::IsStimulate(){
 bool QDevice::IsAvailable(){
     return isAvailable;
 }
-void QDevice::SetPortExist(bool portExist){
-    if(portExist){
+bool QDevice::IsPortExist(){
+    return port != nullptr && port->isOpen();
+}
+void QDevice::UpdatePortLabel(){
+    if(IsPortExist()){
         portErrorLabel->hide();
     }else{
         portErrorLabel->show();
@@ -210,6 +212,7 @@ void QDevice::SetStimulateState(bool b){
 }
 
 void QDevice::AskDeviceState(){
+    if(!IsPortExist()) return;
     //安否確認
     qDebug() << "Send message.";
     //Cはマジックナンバー
@@ -230,7 +233,10 @@ void QDevice::SendGVSParam(){
     SendGVSParam(Current(), Frequency(), WaveForm());
 }
 void QDevice::SendGVSParam(int current, int frequency, int waveForm){
-    char dat1, dat2, dat3, dat4;
+    char dat1 = 0;
+    char dat2 = 0;
+    char dat3 = 0;
+    char dat4 = 0;
     int channel = Channel();
     //dat1
     if((channel & 0x02) != 0)dat1 += 128;

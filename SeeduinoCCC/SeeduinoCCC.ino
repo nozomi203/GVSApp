@@ -30,7 +30,7 @@ float negacon(float phase){
 float (*waves[])(float) = {bipole, posimono, negamono, posicon, negacon, bipole, bipole, bipole};
 
 //const int analogOutPin = A0; // Analog output pin that the LED is attached to
-int g_Ch = 0;
+int g_Ch = 1;
 int g_Val = 0;//0-255
 int g_Freq = 0;//0-1023
 float (*g_Wave)(float)= bipole;
@@ -75,29 +75,39 @@ void loop()
     if(Serial1.available()){
       Dat0 = Serial1.read();
       delay(1);
-      Serial.write("Dat0 Receive:");
+      Serial.write("Channel: ");
+      Serial.print(g_Ch);
+      Serial.write(" Dat0 Receive:");
       Serial.print(Dat0);
       Serial.write("\r\n");
       if(Dat0 == 71){
         digitalWrite(LED_BUILTIN, LOW);
         while(Serial1.available()<=0);
         Dat1 = Serial1.read();
-        Serial.write("Dat1 Receive:");
+        Serial.write("Channel: ");
+        Serial.print(g_Ch);
+        Serial.write(" Dat1 Receive:");
         Serial.print(Dat1);
         Serial.write("\r\n");
         while(Serial1.available()<=0);
         Dat2 = Serial1.read();
-        Serial.write("Dat2 Receive:");
+        Serial.write("Channel: ");
+        Serial.print(g_Ch);
+        Serial.write(" Dat2 Receive:");
         Serial.print(Dat2);
         Serial.write("\r\n");
         while(Serial1.available()<=0);
         Dat3 = Serial1.read();
-        Serial.write("Dat3 Receive:");
+        Serial.write("Channel: ");
+        Serial.print(g_Ch);
+        Serial.write(" Dat3 Receive:");
         Serial.print(Dat3);
         Serial.write("\r\n");
         while(Serial1.available()<=0);
         Dat4 = Serial1.read();
-        Serial.write("Dat4 Receive:");
+        Serial.write("Channel: ");
+        Serial.print(g_Ch);
+        Serial.write(" Dat4 Receive:");
         Serial.print(Dat4);
         Serial.write("\r\n");
         digitalWrite(LED_BUILTIN, HIGH);
