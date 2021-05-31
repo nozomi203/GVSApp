@@ -37,8 +37,11 @@ public:
 
     //波形を増やしたいときはこいつを編集
     const QMap<QString, int> WaveFormMap{
-        {"Direct", 3},
-        {"Square", 0}
+        {"Bipole", 0},
+        {"PosiMono", 1},
+        {"NegaMono", 2},
+        {"PosiConst", 3},
+        {"NegaConst", 4}
     };
 signals:
     void removed(QDevice* dev);
