@@ -10,13 +10,13 @@
 ・予期せぬバグによって電流が止まらなくなる可能性は十分にありうるので，そうなったらデバイスの給電を抜いて強制的に停止させる．
 
 ---
-#macで使いたい場合
+# macで使いたい場合
 Arduino IDEでSeeduinoCCC以下のプログラムを書くところまではWindows(上記)と同様で大丈夫だけど，QtCreatorのバージョンを揃えたりPortNameの調べ方がちょっと癖あるので注意する．
 事前準備として，Xcodeをダウンロードしておくこと．QtCreatorも大概だけどこちらもめちゃ重いので時間がかかる．
 
-SeeduinoXIAOに書き込む方法がわからない時は[公式](https://wiki.seeedstudio.com/jp/Seeeduino-XIAO/)を参考にする．
+※SeeduinoXIAOに書き込む方法がわからない時は[公式](https://wiki.seeedstudio.com/jp/Seeeduino-XIAO/)を参考にする．
 
-##以下手順
+## 以下手順
 1. QtCreatorのインストローラを[HP](https://www.qt.io/download-open-source)からダウンロードする
 2. Installするverを選択する時に，Archiveにチェックを入れてFilterをかける
 3. ***Qt/5.12.10***にチェックを入れて付属のモジュールもとりあえず全てチェックしてインストール(時間かかる)
