@@ -1,3 +1,4 @@
+
 //wave func
 float bipole(float phase){
   if(phase < 0.5){
@@ -42,18 +43,12 @@ float t = 0;
 float ts = 0;
 float te = 0;
 
-
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(1, OUTPUT);
   pinMode(2, OUTPUT);
   
   Serial1.begin(9600);
-  Serial.begin(9600);
-  while (!Serial1);
-  while(!Serial);
-
- 
 }
 
 int setPolarity(int value){
@@ -71,65 +66,66 @@ int setPolarity(int value){
 void loop()
 {
   char Dat0, Dat1, Dat2, Dat3, Dat4;
-   while(1){
-    if(Serial1.available()){
-      Dat0 = Serial1.read();
-      delay(1);
-      Serial.write("Channel: ");
-      Serial.print(g_Ch);
-      Serial.write(" Dat0 Receive:");
-      Serial.print(Dat0);
-      Serial.write("\r\n");
-      if(Dat0 == 71){
-        digitalWrite(LED_BUILTIN, LOW);
-        while(Serial1.available()<=0);
-        Dat1 = Serial1.read();
-        Serial.write("Channel: ");
-        Serial.print(g_Ch);
-        Serial.write(" Dat1 Receive:");
-        Serial.print(Dat1);
-        Serial.write("\r\n");
-        while(Serial1.available()<=0);
-        Dat2 = Serial1.read();
-        Serial.write("Channel: ");
-        Serial.print(g_Ch);
-        Serial.write(" Dat2 Receive:");
-        Serial.print(Dat2);
-        Serial.write("\r\n");
-        while(Serial1.available()<=0);
-        Dat3 = Serial1.read();
-        Serial.write("Channel: ");
-        Serial.print(g_Ch);
-        Serial.write(" Dat3 Receive:");
-        Serial.print(Dat3);
-        Serial.write("\r\n");
-        while(Serial1.available()<=0);
-        Dat4 = Serial1.read();
-        Serial.write("Channel: ");
-        Serial.print(g_Ch);
-        Serial.write(" Dat4 Receive:");
-        Serial.print(Dat4);
-        Serial.write("\r\n");
-        digitalWrite(LED_BUILTIN, HIGH);
+   
+  if(Serial1.available()){
+    Dat0 = Serial1.read();
+    delay(1);
+    if(Dat0 == 71){
+      Serial1.write("Channel: ");
+      Serial1.print(g_Ch);
+      Serial1.write(" Dat0 Receive:");
+      Serial1.print(Dat0);
+      Serial1.write("\r\n");
+      digitalWrite(LED_BUILTIN, LOW);
+      while(Serial1.available()<=0);
+      Dat1 = Serial1.read();
+      Serial1.write("Channel: ");
+      Serial1.print(g_Ch);
+      Serial1.write(" Dat1 Receive:");
+      Serial1.print(Dat1);
+      Serial1.write("\r\n");
+      while(Serial1.available()<=0);
+      Dat2 = Serial1.read();
+      Serial1.write("Channel: ");
+      Serial1.print(g_Ch);
+      Serial1.write(" Dat2 Receive:");
+      Serial1.print(Dat2);
+      Serial1.write("\r\n");
+      while(Serial1.available()<=0);
+      Dat3 = Serial1.read();
+      Serial1.write("Channel: ");
+      Serial1.print(g_Ch);
+      Serial1.write(" Dat3 Receive:");
+      Serial1.print(Dat3);
+      Serial1.write("\r\n");
+      while(Serial1.available()<=0);
+      Dat4 = Serial1.read();
+      Serial1.write("Channel: ");
+      Serial1.print(g_Ch);
+      Serial1.write(" Dat4 Receive:");
+      Serial1.print(Dat4);
+      Serial1.write("\r\n");
+      digitalWrite(LED_BUILTIN, HIGH);
   
-        ConvertChtoBin(Dat1,Dat2, Dat3, Dat4);
-      }
-      if(Dat0 == 67){
-        Serial.write("Alive.\r\n");
-        Serial1.print(g_Ch);
-      }
+      ConvertChtoBin(Dat1,Dat2, Dat3, Dat4);
     }
-    //update
-    te = micros()/(float)1000000;
-    float diff = te - ts;
-    ts = te;
-    t = t + diff * g_Freq;
-    t = t - (int)t;
-    int value = g_Val * g_Wave(t);
-    value = setPolarity(value);
-    analogWrite(A0, (char)(value));
-    Dat0 = 0;
+    if(Dat0 == 67){
+      //Serial.write("Alive.\r\n");
+      Serial1.print(g_Ch);
+    }
   }
+    
+    
+  //update
+  te = micros()/(float)1000000;
+  float diff = te - ts;
+  ts = te;
+  t = t + diff * g_Freq;
+  t = t - (int)t;
+  int value = g_Val * g_Wave(t);
+  value = setPolarity(value);
+  analogWrite(A0, (char)(value));
+  Dat0 = 0;
 }
 
 void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
@@ -192,5 +188,4 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
           ts = te;
         }
     }
-
 }
