@@ -1,5 +1,7 @@
- #include "qdevice.h"
+#include "qdevice.h"
+#include "mainwindow.h"
 #include <QtCore/QDebug>
+#include <cmath>
 
 QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
 {
@@ -27,7 +29,7 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     stimulateStateLabel = new QLabel(this);
 
     //移動
-    this->setFixedSize(180, 270);
+    this->setFixedSize(BOX_WIDTH, BOX_HEIGHT);
     this->SetID(deviceID);
 
     removeButton->setGeometry(100,10,70,28);
@@ -109,7 +111,18 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
 
 void QDevice::SetID(int id){
     this->setTitle("Device " + QString::number(id));
-    this->move(10 + 190 * id, 60);
+    int row = id / MainWindow::DEVICE_PER_ROW;
+    int column = id % MainWindow::DEVICE_PER_ROW;
+    int max_column = MainWindow::DEVICE_PER_ROW;
+    int max_row = ceil(MainWindow::MAX_DEVICE_COUNT / (float)max_column);
+    int margin_left = (MainWindow::WINDOW_WIDTH
+                       - BOX_WIDTH * max_column
+                       - BOX_MARGIN * (max_column - 1)) / 2;
+    int margin_top = (MainWindow::WINDOW_HEIGHT
+                       - BOX_HEIGHT * max_row
+                       - BOX_MARGIN * (max_row - 1)) / 2;
+
+    this->move(margin_left + (BOX_WIDTH + BOX_MARGIN) * column, margin_top + (BOX_HEIGHT + BOX_MARGIN) * row);
 }
 void QDevice::SetPort(QSerialPort* serialPort){
     port = serialPort;

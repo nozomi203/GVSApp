@@ -16,6 +16,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    static const int MAX_DEVICE_COUNT = 18;
+    static const int DEVICE_PER_ROW = 6;
+    static const int WINDOW_WIDTH = 1200;
+    static const int WINDOW_HEIGHT = 900;
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void AddDevice();
@@ -35,7 +39,6 @@ private:
     Ui::MainWindow *ui;
     QList<QDevice*> deviceList;
     QMap<QString, QSerialPort*> nameToPort;
-    const int MAX_DEVICE_COUNT = 4;
     bool isConnect;
 };
 #endif // MAINWINDOW_H

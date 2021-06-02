@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     isConnect = false;
+    this->resize(WINDOW_WIDTH, WINDOW_HEIGHT);
 }
 
 MainWindow::~MainWindow()

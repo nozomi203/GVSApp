@@ -35,6 +35,11 @@ public:
     bool IsAvailable();
     bool IsPortExist();
 
+    //ウィンドウサイズ
+    static const int BOX_WIDTH = 180;
+    static const int BOX_HEIGHT = 270;
+    static const int BOX_MARGIN = 10;
+
     //波形を増やしたいときはこいつを編集
     const QMap<QString, int> WaveFormMap{
         {"Bipole", 0},
