@@ -16,10 +16,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    static const int MAX_DEVICE_COUNT = 18;
+    static const int MAX_DEVICE_COUNT = 12;
     static const int DEVICE_PER_ROW = 6;
     static const int WINDOW_WIDTH = 1200;
-    static const int WINDOW_HEIGHT = 900;
+    static const int WINDOW_HEIGHT = 1080;
+    static const int MARGIN_TOP = 60;
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void AddDevice();
