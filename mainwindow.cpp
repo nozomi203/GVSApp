@@ -18,6 +18,7 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::AddDevice(){
+    if(isConnect) return;
     QDevice* dev = new QDevice(deviceList.count(), ui->centralwidget);
     connect(dev, SIGNAL(removed(QDevice*)), this, SLOT(RemoveDevice(QDevice*)));
     connect(dev, SIGNAL(stimEnd()), this, SLOT(DetectStimEnd()));
@@ -92,7 +93,9 @@ void MainWindow::Disconnect(){
 
     //デバイスの停止
     foreach(auto &dev, deviceList){
-        dev->Disconnect();
+        if(dev->IsAvailable()){
+            dev->Disconnect();
+        }
     }
 }
 

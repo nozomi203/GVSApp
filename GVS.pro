@@ -11,11 +11,13 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    qdevice.cpp
+    qdevice.cpp \
+    transition.cpp
 
 HEADERS += \
     mainwindow.h \
-    qdevice.h
+    qdevice.h \
+    transition.h
 
 FORMS += \
     mainwindow.ui

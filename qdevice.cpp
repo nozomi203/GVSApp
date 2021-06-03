@@ -1,12 +1,13 @@
 #include "qdevice.h"
 #include "mainwindow.h"
 #include <QtCore/QDebug>
-#include <cmath>
 
 QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
 {
     qDebug() << "Hello Device.";
+
     //Widget生成
+    qDebug() << "Instantiate widget.";
     removeButton = new QPushButton(this);
 
     channelSpinBox = new QSpinBox(this);
@@ -15,8 +16,8 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     frequencySpinBox = new QSpinBox(this);
     stimDurationSpinBox = new QSpinBox(this);
     waveFormComboBox = new QComboBox(this);
-    gradDurationSpinBox = new QSpinBox(this);
-    gradFormComboBox = new QComboBox(this);
+    transitionDurationSpinBox = new QSpinBox(this);
+    transitionFormComboBox = new QComboBox(this);
 
     channelLabel = new QLabel(this);
     portNameLabel = new QLabel(this);
@@ -24,83 +25,122 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     frequencyLabel = new QLabel(this);
     stimDurationLabel = new QLabel(this);
     waveFormLabel = new QLabel(this);
-    gradDurationLabel = new QLabel(this);
-    gradFormLabel = new QLabel(this);
+    transitionDurationLabel = new QLabel(this);
+    transitionFormLabel = new QLabel(this);
 
     portErrorLabel = new QLabel(this);
     portAvailableLabel = new QLabel(this);
     stimulateStateLabel = new QLabel(this);
 
     //移動
+    qDebug() << "Set position.";
     this->setFixedSize(BOX_WIDTH, BOX_HEIGHT);
     this->SetID(deviceID);
 
-    removeButton->setGeometry(100,10,70,28);
+    removeButton->setGeometry(180,10,70,28);
 
-    channelSpinBox->setGeometry(90, 67, 80, 22);
-    portNameLineEdit->setGeometry(90, 97, 80, 22);
-    currentSpinBox->setGeometry(90, 127, 80, 22);
-    frequencySpinBox->setGeometry(90, 157, 80, 22);
-    stimDurationSpinBox->setGeometry(90, 187, 80, 22);
-    waveFormComboBox->setGeometry(90, 217, 80, 22);
-    gradDurationSpinBox->setGeometry(90, 247, 80, 22);
-    gradFormComboBox->setGeometry(90, 277, 80, 22);
-    stimulateStateLabel->setGeometry(90, 310, 80, 15);
+    channelSpinBox->setGeometry(120, 67, 130, 22);
+    channelSpinBox->setAlignment(Qt::AlignRight);
+    portNameLineEdit->setGeometry(120, 97, 130, 22);
+    portNameLineEdit->setAlignment(Qt::AlignRight);
+    currentSpinBox->setGeometry(120, 127, 130, 22);
+    currentSpinBox->setAlignment(Qt::AlignRight);
+    frequencySpinBox->setGeometry(120, 157, 130, 22);
+    frequencySpinBox->setAlignment(Qt::AlignRight);
+    stimDurationSpinBox->setGeometry(120, 187, 130, 22);
+    stimDurationSpinBox->setAlignment(Qt::AlignRight);
+    waveFormComboBox->setGeometry(120, 217, 130, 22);
+    transitionDurationSpinBox->setGeometry(120, 247, 130, 22);
+    transitionDurationSpinBox->setAlignment(Qt::AlignRight);
+    transitionFormComboBox->setGeometry(120, 277, 130, 22);
+    stimulateStateLabel->setGeometry(120, 310, 130, 15);
 
     portErrorLabel->setGeometry(10, 40, 160,15);
-    channelLabel->setGeometry(10, 70, 80, 15);
-    portNameLabel->setGeometry(10, 100, 80, 15);
-    currentLabel->setGeometry(10, 130, 80, 15);
-    frequencyLabel->setGeometry(10, 160, 80, 15);
-    stimDurationLabel->setGeometry(10, 190, 80, 15);
-    waveFormLabel->setGeometry(10, 220, 80, 15);
-    gradDurationLabel->setGeometry(10, 250, 80, 15);
-    gradFormLabel->setGeometry(10, 280, 80,15);
-    portAvailableLabel->setGeometry(10, 310, 80, 15);
+    channelLabel->setGeometry(10, 70, 110, 15);
+    portNameLabel->setGeometry(10, 100, 110, 15);
+    currentLabel->setGeometry(10, 130, 110, 15);
+    frequencyLabel->setGeometry(10, 160, 110, 15);
+    stimDurationLabel->setGeometry(10, 190, 110, 15);
+    waveFormLabel->setGeometry(10, 220, 110, 15);
+    transitionDurationLabel->setGeometry(10, 250, 110, 15);
+    transitionFormLabel->setGeometry(10, 280, 110,15);
+    portAvailableLabel->setGeometry(10, 310, 110, 15);
     //ComboBoxの初期化
     foreach(auto waveForm, WaveFormMap.keys()){
         waveFormComboBox->addItem(waveForm);
     }
-    foreach(auto gradForm, GradFormMap.keys()){
-        gradFormComboBox->addItem(gradForm);
+    foreach(auto gradForm, TransitionFormMap.keys()){
+        transitionFormComboBox->addItem(gradForm);
     }
 
+    //最初は無刺激
+    SetStimulateState(false);
+    SetIsAvailable(false);
+
     //コールバック設定
+    qDebug() << "Set callback";
     connect(removeButton, &QPushButton::clicked, this, [=](){
             RemoveDevice();
     });
-
+    connect(channelSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int value){
+        if(IsStimulate()) Disconnect();
+        channel = value;
+        SetIsAvailable(false);
+        AskDeviceState();
+    });
     connect(portNameLineEdit, &QLineEdit::textChanged, this, [=]{
+        if(IsStimulate()) Disconnect();
         emit portNameChanged(this);
     });
-
-    connect(channelSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=]{
-        AskDeviceState();
+    connect(currentSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int value){
+        current = value;
+        if(IsStimulate()){
+            SendGVSParam();
+        }
+    });
+    connect(frequencySpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int value){
+        frequency = value;
+        if(IsStimulate()){
+            SendGVSParam();
+        }
+    });
+    connect(stimDurationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int value){
+        stimDuration = value;
+    });
+    connect(waveFormComboBox, &QComboBox::currentTextChanged, this, [=](QString value){
+        waveForm = WaveFormMap[value];
+    });
+    connect(transitionDurationSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int value){
+        transitionDuration = value;
+    });
+    connect(transitionFormComboBox, &QComboBox::currentTextChanged, this, [=](QString value){
+        transitionForm = TransitionFormMap[value];
     });
 
     //値の設定
+    qDebug() << "Set value.";
     removeButton->setText("Remove");
 
     channelSpinBox->setMaximum(MAX_CHANNEL);
     currentSpinBox->setMaximum(MAX_CURRENT);
     frequencySpinBox->setMaximum(MAX_FREQUENCY);
     stimDurationSpinBox->setMaximum(MAX_STIM_DURATION);
-    gradDurationSpinBox->setMaximum(MAX_GRAD_DURATION);
+    transitionDurationSpinBox->setMaximum(MAX_TRANSITION_DURATION);
     channelSpinBox->setValue(INIT_CHANNEL);
     portNameLineEdit->setText("COM0");
     currentSpinBox->setValue(INIT_CURRENT);
     frequencySpinBox->setValue(INIT_FREQUENCY);
     stimDurationSpinBox->setValue(INIT_STIM_DURATION);
-    gradDurationSpinBox->setValue(INIT_GRAD_DURATION);
+    transitionDurationSpinBox->setValue(INIT_TRANSITION_DURATION);
 
     channelLabel->setText("Channel:");
     portNameLabel->setText("PortName:");
     currentLabel->setText("Current:");
     frequencyLabel->setText("Frequency:");
-    stimDurationLabel->setText("StimDuration:");
+    stimDurationLabel->setText("Duration:");
     waveFormLabel->setText("WaveForm:");
-    gradDurationLabel->setText("GradDuration:");
-    gradFormLabel->setText("GradForm:");
+    transitionDurationLabel->setText("Transition:");
+    transitionFormLabel->setText("TransitionForm:");
 
     portAvailableLabel->setText("No device.");
     portErrorLabel->setText("Port doesn't exist.");
@@ -108,10 +148,6 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     palette.setColor(QPalette::Foreground, QColor("#FF0000"));
     portAvailableLabel->setPalette(palette);
     portErrorLabel->setPalette(palette);
-
-    //最初は無刺激
-    SetStimulateState(false);
-    SetIsAvailable(false);
 
     //タイマー作成
     stimTimer = new QTimer(this);
@@ -147,7 +183,7 @@ void QDevice::SetPort(QSerialPort* serialPort){
 
 void QDevice::RemoveDevice(){
     //接続の停止
-    if(isStimulate){
+    if(IsStimulate()){
         Disconnect();
     }
     emit removed(this);
@@ -174,28 +210,28 @@ void QDevice::Disconnect(){
 }
 
 int QDevice::Channel(){
-    return channelSpinBox->value();
+    return channel;
 }
 QString QDevice::PortName(){
     return portNameLineEdit->text();
 }
 int QDevice::Current(){
-    return currentSpinBox->value();
+    return current;
 }
 int QDevice::Frequency(){
-    return frequencySpinBox->value();
+    return frequency;
 }
 int QDevice::StimDuration(){
-    return stimDurationSpinBox->value();
+    return stimDuration;
 }
 int QDevice::WaveForm(){
-    return WaveFormMap[waveFormComboBox->currentText()];
+    return waveForm;
 }
-int QDevice::GradDuration(){
-    return gradDurationSpinBox->value();
+int QDevice::TransitionDuration(){
+    return transitionDuration;
 }
-int QDevice::GradForm(){
-    return GradFormMap[gradFormComboBox->currentText()];
+int QDevice::TransitionForm(){
+    return transitionForm;
 }
 bool QDevice::IsStimulate(){
     return isStimulate;
@@ -257,51 +293,60 @@ void QDevice::ReceiveDeviceState(){
 }
 
 void QDevice::SendGVSParam(){
-    SendGVSParam(Current(), Frequency(), WaveForm(), GradDuration(), GradForm());
+    SendGVSParam(Current(), Frequency(), WaveForm(), TransitionDuration(), TransitionForm());
 }
-void QDevice::SendGVSParam(int current, int frequency, int waveForm, int gradDuration, int gradForm){
+void QDevice::SendGVSParam(int current, int frequency, int waveForm, int transitionDuration, int transitionForm){
     char dat1 = 0;
     char dat2 = 0;
     char dat3 = 0;
     char dat4 = 0;
+    char dat5 = 0;
     int channel = Channel();
     //dat1
-    if((channel & 0x02) != 0)dat1 += 128;
-    if((channel & 0x01) != 0)dat1 += 64;
-    if((current & 0x800) != 0)dat1 += 32;
-    if((current & 0x400) != 0)dat1 += 16;
-    if((current & 0x200) != 0)dat1 += 8;
-    if((current & 0x100) != 0)dat1 += 4;
-    if((current & 0x80) != 0)dat1 += 2;
-    if((current & 0x40) != 0)dat1 += 1;
-    //dat2
-    if ((current & 0x20) != 0) dat2 += 128;
-    if ((current & 0x10) != 0) dat2 += 64;
-    if ((current & 0x08) != 0) dat2 += 32;
-    if ((current & 0x04) != 0) dat2 += 16;
-    if ((current & 0x02) != 0) dat2 += 8;
-    if ((current & 0x01) != 0) dat2 += 4;
-    if ((frequency & 0x200) != 0) dat2 += 2;
-    if ((frequency & 0x100) != 0) dat2 += 1;
-    //dat3
-    if ((frequency & 0x80) != 0) dat3 += 128;
-    if ((frequency & 0x40) != 0) dat3 += 64;
-    if ((frequency & 0x20) != 0) dat3 += 32;
-    if ((frequency & 0x10) != 0) dat3 += 16;
-    if ((frequency & 0x08) != 0) dat3 += 8;
-    if ((frequency & 0x04) != 0) dat3 += 4;
-    if ((frequency & 0x02) != 0) dat3 += 2;
-    if ((frequency & 0x01) != 0) dat3 += 1;
-    //dat4
-    if ((waveForm & 0x04) != 0) dat4 += 128;
-    if ((waveForm & 0x02) != 0) dat4 += 64;
-    if ((waveForm & 0x01) != 0) dat4 += 32;
-    if ((gradDuration & 0x04) != 0) dat4 += 16;
-    if ((gradDuration & 0x02) != 0) dat4 += 8;
-    if ((gradDuration & 0x01) != 0) dat4 += 4;
-    if ((gradForm & 0x02) != 0) dat4 += 2;
-    if ((gradForm & 0x01) != 0) dat4 += 1;
+    if((channel & 0x04) != 0) dat1 += 128;
+    if((channel & 0x02) != 0) dat1 += 64;
+    if((channel & 0x01) != 0) dat1 += 32;
+    if((current & 0x800) != 0) dat1 += 16;
+    if((current & 0x400) != 0) dat1 += 8;
+    if((current & 0x200) != 0) dat1 += 4;
+    if((current & 0x100) != 0) dat1 += 2;
+    if((current & 0x80) != 0) dat1 += 1;
 
-    char buffer[5] = {71, dat1, dat2, dat3, dat4};
+    //dat2
+    if ((current & 0x40) != 0) dat2 += 128;
+    if ((current & 0x20) != 0) dat2 += 64;
+    if ((current & 0x10) != 0) dat2 += 32;
+    if ((current & 0x08) != 0) dat2 += 16;
+    if ((current & 0x04) != 0) dat2 += 8;
+    if ((current & 0x02) != 0) dat2 += 4;
+    if ((current & 0x01) != 0) dat2 += 2;
+    if ((frequency & 0x200) != 0) dat2 += 1;
+
+    //dat3
+    if ((frequency & 0x100) != 0) dat3 += 128;
+    if ((frequency & 0x80) != 0) dat3 += 64;
+    if ((frequency & 0x40) != 0) dat3 += 32;
+    if ((frequency & 0x20) != 0) dat3 += 16;
+    if ((frequency & 0x10) != 0) dat3 += 8;
+    if ((frequency & 0x08) != 0) dat3 += 4;
+    if ((frequency & 0x04) != 0) dat3 += 2;
+    if ((frequency & 0x02) != 0) dat3 += 1;
+
+    //dat4
+    if ((frequency & 0x01) != 0) dat4 += 128;
+    if ((waveForm & 0x04) != 0) dat4 += 64;
+    if ((waveForm & 0x02) != 0) dat4 += 32;
+    if ((waveForm & 0x01) != 0) dat4 += 16;
+    if ((transitionDuration & 0x08) != 0) dat4 += 8;
+    if ((transitionDuration & 0x04) != 0) dat4 += 4;
+    if ((transitionDuration & 0x02) != 0) dat4 += 2;
+    if ((transitionDuration & 0x01) != 0) dat4 += 1;
+
+    //dat5
+    if ((transitionForm & 0x04) != 0) dat5 += 128;
+    if ((transitionForm & 0x02) != 0) dat5 += 64;
+    if ((transitionForm & 0x01) != 0) dat5 += 32;
+
+    char buffer[6] = {71, dat1, dat2, dat3, dat4, dat5};
     port->write(buffer, sizeof(buffer));
 }

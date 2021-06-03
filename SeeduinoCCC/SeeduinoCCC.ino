@@ -1,3 +1,4 @@
+#define PI 3.141592653589793
 
 //wave func
 float bipole(float phase){
@@ -27,14 +28,29 @@ float posicon(float phase){
 float negacon(float phase){
   return -1;
 }
-
-float (*waves[])(float) = {bipole, posimono, negamono, posicon, negacon, bipole, bipole, bipole};
+float sine(float phase){
+  return sin(2 * PI * phase);
+}
+//transition func
+float constant(float phase){
+  return 1;
+}
+float linear(float phase){
+  return phase;
+}
+float smooth(float phase){
+  return phase * phase * (3 - 2 * phase);
+}
+float (*waves[])(float) = {bipole, posimono, negamono, posicon, negacon, sine, bipole, bipole};
+float (*transitions[])(float) = {constant, linear, smooth, smooth, smooth, smooth, smooth, smooth};
 
 //const int analogOutPin = A0; // Analog output pin that the LED is attached to
-int g_Ch = 1;
+int g_Ch = 0;
 int g_Val = 0;//0-255
 int g_Freq = 0;//0-1023
+float g_Transition_Speed = 0;
 float (*g_Wave)(float)= bipole;
+float (*g_Transition)(float) = constant;
 int data[3] = {0,0,0};
 char key = 0;
 int g_polarity = 0;
@@ -42,6 +58,8 @@ int g_polarity = 0;
 float t = 0;
 float ts = 0;
 float te = 0;
+//for transition
+float t_trans = 0;
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -65,52 +83,28 @@ int setPolarity(int value){
 
 void loop()
 {
-  char Dat0, Dat1, Dat2, Dat3, Dat4;
+  char Dat0, Dat1, Dat2, Dat3, Dat4, Dat5;
    
   if(Serial1.available()){
     Dat0 = Serial1.read();
     delay(1);
     if(Dat0 == 71){
-      Serial1.write("Channel: ");
-      Serial1.print(g_Ch);
-      Serial1.write(" Dat0 Receive:");
-      Serial1.print(Dat0);
-      Serial1.write("\r\n");
       digitalWrite(LED_BUILTIN, LOW);
       while(Serial1.available()<=0);
       Dat1 = Serial1.read();
-      Serial1.write("Channel: ");
-      Serial1.print(g_Ch);
-      Serial1.write(" Dat1 Receive:");
-      Serial1.print(Dat1);
-      Serial1.write("\r\n");
       while(Serial1.available()<=0);
       Dat2 = Serial1.read();
-      Serial1.write("Channel: ");
-      Serial1.print(g_Ch);
-      Serial1.write(" Dat2 Receive:");
-      Serial1.print(Dat2);
-      Serial1.write("\r\n");
       while(Serial1.available()<=0);
       Dat3 = Serial1.read();
-      Serial1.write("Channel: ");
-      Serial1.print(g_Ch);
-      Serial1.write(" Dat3 Receive:");
-      Serial1.print(Dat3);
-      Serial1.write("\r\n");
       while(Serial1.available()<=0);
       Dat4 = Serial1.read();
-      Serial1.write("Channel: ");
-      Serial1.print(g_Ch);
-      Serial1.write(" Dat4 Receive:");
-      Serial1.print(Dat4);
-      Serial1.write("\r\n");
+      while(Serial1.available()<=0);
+      Dat5 = Serial1.read();
       digitalWrite(LED_BUILTIN, HIGH);
   
-      ConvertChtoBin(Dat1,Dat2, Dat3, Dat4);
+      ConvertChtoBin(Dat1,Dat2, Dat3, Dat4, Dat5);
     }
     if(Dat0 == 67){
-      //Serial.write("Alive.\r\n");
       Serial1.print(g_Ch);
     }
   }
@@ -119,73 +113,87 @@ void loop()
   //update
   te = micros()/(float)1000000;
   float diff = te - ts;
+  
   ts = te;
   t = t + diff * g_Freq;
   t = t - (int)t;
-  int value = g_Val * g_Wave(t);
+  
+  t_trans = t_trans + diff * g_Transition_Speed;
+  t_trans = min(t_trans, 1);
+  
+  int value = g_Val * g_Wave(t) * g_Transition(t_trans);
   value = setPolarity(value);
   analogWrite(A0, (char)(value));
   Dat0 = 0;
 }
 
-void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4)
+void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4, char dat5)
 {
     int ch =0;
     
-    if((dat1 & 0x80) != 0) ch = ch + 2;
-    if((dat1 & 0x40) != 0) ch = ch + 1;
+    if((dat1 & 0x80) != 0) ch = ch + 4;
+    if((dat1 & 0x40) != 0) ch = ch + 2;
+    if((dat1 & 0x20) != 0) ch= ch + 1;
 
     if(g_Ch == ch){
         
         int current = 0;
         int frequency = 0;
         int wave = 0;
+        int transition_Duration = 0;
+        int transition = 0;
         
-        if((dat1 & 0x20) != 0) current = current + 2048;
-        if((dat1 & 0x10) != 0) current = current + 1024;
-        if((dat1 & 0x08) != 0) current = current + 512;
-        if((dat1 & 0x04) != 0) current = current + 256;
-        if((dat1 & 0x02) != 0) current = current + 128;
-        if((dat1 & 0x01) != 0) current = current + 64;
-        if((dat2 & 0x80) != 0) current = current + 32;
-        if((dat2 & 0x40) != 0) current = current + 16;
-        if((dat2 & 0x20) != 0) current = current + 8;
-        if((dat2 & 0x10) != 0) current = current + 4;
-        if((dat2 & 0x08) != 0) current = current + 2;
-        if((dat2 & 0x04) != 0) current = current + 1;
+        if((dat1 & 0x10) != 0) current = current + 2048;
+        if((dat1 & 0x08) != 0) current = current + 1024;
+        if((dat1 & 0x04) != 0) current = current + 512;
+        if((dat1 & 0x02) != 0) current = current + 256;
+        if((dat1 & 0x01) != 0) current = current + 128;
+        if((dat2 & 0x80) != 0) current = current + 64;
+        if((dat2 & 0x40) != 0) current = current + 32;
+        if((dat2 & 0x20) != 0) current = current + 16;
+        if((dat2 & 0x10) != 0) current = current + 8;
+        if((dat2 & 0x08) != 0) current = current + 4;
+        if((dat2 & 0x04) != 0) current = current + 2;
+        if((dat2 & 0x02) != 0) current = current + 1;
 
         g_Val = (int) (current / 16);
-        Serial.write("Current:");
-        Serial.print(g_Val);
-        Serial.write("\r\n");
-
-        if((dat2 & 0x02) != 0) frequency = frequency + 512;
-        if((dat2 & 0x01) != 0) frequency = frequency + 256;
-        if((dat3 & 0x80) != 0) frequency = frequency + 128;
-        if((dat3 & 0x40) != 0) frequency = frequency + 64;
-        if((dat3 & 0x20) != 0) frequency = frequency + 32;
-        if((dat3 & 0x10) != 0) frequency = frequency + 16;
-        if((dat3 & 0x08) != 0) frequency = frequency + 8;
-        if((dat3 & 0x04) != 0) frequency = frequency + 4;
-        if((dat3 & 0x02) != 0) frequency = frequency + 2;
-        if((dat3 & 0x01) != 0) frequency = frequency + 1;
+        Serial1.print(g_Val);
+        if((dat2 & 0x01) != 0) frequency = frequency + 512;
+        if((dat3 & 0x80) != 0) frequency = frequency + 256;
+        if((dat3 & 0x40) != 0) frequency = frequency + 128;
+        if((dat3 & 0x20) != 0) frequency = frequency + 64;
+        if((dat3 & 0x10) != 0) frequency = frequency + 32;
+        if((dat3 & 0x08) != 0) frequency = frequency + 16;
+        if((dat3 & 0x04) != 0) frequency = frequency + 8;
+        if((dat3 & 0x02) != 0) frequency = frequency + 4;
+        if((dat3 & 0x01) != 0) frequency = frequency + 2;
+        if((dat4 & 0x80) != 0) frequency = frequency + 1;
 
         g_Freq = frequency;
-        Serial.write("Frequency:");
-        Serial.print(g_Freq);
-        Serial.write("\r\n");
-        
-        if((dat4 & 0x80) != 0) wave = wave + 4;
-        if((dat4 & 0x40) != 0) wave = wave + 2;
-        if((dat4 & 0x20) != 0) wave = wave + 1;
+        Serial1.print(g_Freq);
+        if((dat4 & 0x40) != 0) wave = wave + 4;
+        if((dat4 & 0x20) != 0) wave = wave + 2;
+        if((dat4 & 0x10) != 0) wave = wave + 1;
 
         g_Wave = waves[wave];
 
-        //タイマーリセット
-        if((dat4 & 0x10) != 0){
-          t = 0;
-          te = micros()/ (float)1000000;
-          ts = te;
+        if((dat4 & 0x08) != 0) transition_Duration = transition_Duration + 8;
+        if((dat4 & 0x04) != 0) transition_Duration = transition_Duration + 4;
+        if((dat4 & 0x02) != 0) transition_Duration = transition_Duration + 2;
+        if((dat4 & 0x01) != 0) transition_Duration = transition_Duration + 1;
+
+        if(transition_Duration == 0){
+          g_Transition_Speed = 0;
+        }else{
+          g_Transition_Speed = 1 / (float)transition_Duration;
         }
+        Serial1.print(transition_Duration);
+        if((dat5 & 0x80) != 0) transition = transition + 4;
+        if((dat5 & 0x40) != 0) transition = transition + 2;
+        if((dat5 & 0x20) != 0) transition = transition + 1;
+
+        g_Transition = transitions[transition];
+        //reset transition time
+        t_trans = 0;
     }
 }
