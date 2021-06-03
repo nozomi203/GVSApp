@@ -4,6 +4,16 @@
 
 ② GvsApp/build/GVSApp/GVS.exeを実行．「Add Device」を押し，表示されたボックス内のIDを1.で書き換えたg_Chに合わせる．また，PortNameもデバイスが接続されているポートに合わせて書き換える．Current,Frequency,Duration,WaveFormをそれぞれ調整したらStartで刺激開始．
 
+## 要素説明
+channel: デバイスを識別する数字．0-7まで設定．
+portname: 接続するポートの名前．デバイスマネージャーで調べる．
+current: 電流値．0（刺激なし）- 4095（デバイスの出せる最大値）の間で設定．
+frequency: 周波数．0-1023(Hz)の間で設定．
+waveform: 刺激波形．square_bipole→両極矩形波．square_positive→正の片側矩形波．square_negative→負の片側矩形波．direct_positive→正の直流．direct_negative→負の直流
+duration: 刺激の継続時間．0-180(秒)の間で設定．
+transition_duration: 刺激強度の最大値に達するまでの時間．0-15の間で設定．
+transition_form: 刺激強度の最大値に達するまでの遷移関数．constant→遷移なし．linear→線形に増加．smooth→スムーズに接続（t*t*(3 - 2 * t）．
+
 ## 注意点
 ・ポート名が間違っている場合はその旨が表示されるので正しいポート名に直す．
 ・ポート名が合っていてもデバイスからの応答がない場合，ボックスの左下に「No device」と表示される．この場合はTeratarm等を駆使してデバッグする．
