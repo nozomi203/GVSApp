@@ -43,7 +43,7 @@ public:
     static const int BOX_HEIGHT = 330;
     static const int BOX_MARGIN = 10;
     //最大値
-    static const int MAX_CHANNEL = 3;
+    static const int MAX_CHANNEL = 7;
     static const int MAX_CURRENT = 4095;
     static const int MAX_FREQUENCY = 1023;
     static const int MAX_STIM_DURATION = 180;
@@ -54,6 +54,8 @@ public:
     static const int INIT_FREQUENCY = 80;
     static const int INIT_STIM_DURATION = 10;
     static const int INIT_TRANSITION_DURATION = 1;
+    static const int INIT_WAVEFORM_IDX = 3;
+    static const int INIT_TRANSITIONFORM_IDX = 0;
 
     //波形を増やしたいときはこいつを編集
     const QMap<QString, int> WaveFormMap{

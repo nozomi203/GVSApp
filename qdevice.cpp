@@ -130,8 +130,10 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     portNameLineEdit->setText("COM0");
     currentSpinBox->setValue(INIT_CURRENT);
     frequencySpinBox->setValue(INIT_FREQUENCY);
+    waveFormComboBox->setCurrentIndex(INIT_WAVEFORM_IDX);
     stimDurationSpinBox->setValue(INIT_STIM_DURATION);
     transitionDurationSpinBox->setValue(INIT_TRANSITION_DURATION);
+    transitionFormComboBox->setCurrentIndex(INIT_TRANSITIONFORM_IDX);
 
     channelLabel->setText("Channel:");
     portNameLabel->setText("PortName:");

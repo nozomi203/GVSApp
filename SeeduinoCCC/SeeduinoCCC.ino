@@ -157,7 +157,6 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4, char dat5)
         if((dat2 & 0x02) != 0) current = current + 1;
 
         g_Val = (int) (current / 16);
-        Serial1.print(g_Val);
         if((dat2 & 0x01) != 0) frequency = frequency + 512;
         if((dat3 & 0x80) != 0) frequency = frequency + 256;
         if((dat3 & 0x40) != 0) frequency = frequency + 128;
@@ -170,7 +169,6 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4, char dat5)
         if((dat4 & 0x80) != 0) frequency = frequency + 1;
 
         g_Freq = frequency;
-        Serial1.print(g_Freq);
         if((dat4 & 0x40) != 0) wave = wave + 4;
         if((dat4 & 0x20) != 0) wave = wave + 2;
         if((dat4 & 0x10) != 0) wave = wave + 1;
@@ -187,7 +185,6 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4, char dat5)
         }else{
           g_Transition_Speed = 1 / (float)transition_Duration;
         }
-        Serial1.print(transition_Duration);
         if((dat5 & 0x80) != 0) transition = transition + 4;
         if((dat5 & 0x40) != 0) transition = transition + 2;
         if((dat5 & 0x20) != 0) transition = transition + 1;
