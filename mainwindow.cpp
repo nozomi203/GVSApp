@@ -38,6 +38,12 @@ void MainWindow::RemoveDevice(QDevice* device){
         deviceList[i]->SetID(i);
     }
 }
+void MainWindow::RemovePort(GVSSerialPort* port){
+    QString portName = port->portName();
+    if(nameToPort.contains(portName)){
+        nameToPort.remove(portName);
+    }
+}
 
 void MainWindow::DetectStimEnd(){
     foreach(auto &dev, deviceList){
@@ -49,7 +55,7 @@ void MainWindow::DetectStimEnd(){
 }
 
 void MainWindow::FindTargetPort(QDevice* device){
-    QSerialPort* sp = nullptr;
+    GVSSerialPort* sp = nullptr;
     QString portName = device->PortName();
     if(nameToPort.contains(portName)){
         sp = nameToPort[portName];
@@ -57,11 +63,12 @@ void MainWindow::FindTargetPort(QDevice* device){
         //名前の一致するポートを探す
         foreach(auto &serialPortInfo, QSerialPortInfo::availablePorts()){
             if(serialPortInfo.portName() == portName){
-                QSerialPort* newPort = new QSerialPort(serialPortInfo);
+                GVSSerialPort* newPort = new GVSSerialPort(serialPortInfo);
                 //ポートオープン
                 if(newPort->open(QIODevice::ReadWrite)){
                     qDebug() << portName << " added.";
                     nameToPort[portName] = newPort;
+                    connect(newPort, SIGNAL(removed(GVSSerialPort*)), this, SLOT(RemovePort(GVSSerialPort*)));
                     sp = nameToPort[portName];
                     break;
                 }else{

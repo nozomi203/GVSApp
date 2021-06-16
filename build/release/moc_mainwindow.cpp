@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[10];
-    char stringdata0[142];
+    QByteArrayData data[13];
+    char stringdata0[173];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -39,13 +39,17 @@ QT_MOC_LITERAL(4, 62, 21), // "on_StopButton_clicked"
 QT_MOC_LITERAL(5, 84, 12), // "RemoveDevice"
 QT_MOC_LITERAL(6, 97, 8), // "QDevice*"
 QT_MOC_LITERAL(7, 106, 6), // "device"
-QT_MOC_LITERAL(8, 113, 13), // "DetectStimEnd"
-QT_MOC_LITERAL(9, 127, 14) // "FindTargetPort"
+QT_MOC_LITERAL(8, 113, 10), // "RemovePort"
+QT_MOC_LITERAL(9, 124, 14), // "GVSSerialPort*"
+QT_MOC_LITERAL(10, 139, 4), // "port"
+QT_MOC_LITERAL(11, 144, 13), // "DetectStimEnd"
+QT_MOC_LITERAL(12, 158, 14) // "FindTargetPort"
 
     },
     "MainWindow\0on_AddDeviceButton_clicked\0"
     "\0on_StartButton_clicked\0on_StopButton_clicked\0"
-    "RemoveDevice\0QDevice*\0device\0DetectStimEnd\0"
+    "RemoveDevice\0QDevice*\0device\0RemovePort\0"
+    "GVSSerialPort*\0port\0DetectStimEnd\0"
     "FindTargetPort"
 };
 #undef QT_MOC_LITERAL
@@ -56,7 +60,7 @@ static const uint qt_meta_data_MainWindow[] = {
        8,       // revision
        0,       // classname
        0,    0, // classinfo
-       6,   14, // methods
+       7,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -64,18 +68,20 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   44,    2, 0x08 /* Private */,
-       3,    0,   45,    2, 0x08 /* Private */,
-       4,    0,   46,    2, 0x08 /* Private */,
-       5,    1,   47,    2, 0x08 /* Private */,
-       8,    0,   50,    2, 0x08 /* Private */,
-       9,    1,   51,    2, 0x08 /* Private */,
+       1,    0,   49,    2, 0x08 /* Private */,
+       3,    0,   50,    2, 0x08 /* Private */,
+       4,    0,   51,    2, 0x08 /* Private */,
+       5,    1,   52,    2, 0x08 /* Private */,
+       8,    1,   55,    2, 0x08 /* Private */,
+      11,    0,   58,    2, 0x08 /* Private */,
+      12,    1,   59,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, 0x80000000 | 6,    7,
+    QMetaType::Void, 0x80000000 | 9,   10,
     QMetaType::Void,
     QMetaType::Void, 0x80000000 | 6,    7,
 
@@ -92,8 +98,9 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 1: _t->on_StartButton_clicked(); break;
         case 2: _t->on_StopButton_clicked(); break;
         case 3: _t->RemoveDevice((*reinterpret_cast< QDevice*(*)>(_a[1]))); break;
-        case 4: _t->DetectStimEnd(); break;
-        case 5: _t->FindTargetPort((*reinterpret_cast< QDevice*(*)>(_a[1]))); break;
+        case 4: _t->RemovePort((*reinterpret_cast< GVSSerialPort*(*)>(_a[1]))); break;
+        case 5: _t->DetectStimEnd(); break;
+        case 6: _t->FindTargetPort((*reinterpret_cast< QDevice*(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -106,7 +113,14 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
                 *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< QDevice* >(); break;
             }
             break;
-        case 5:
+        case 4:
+            switch (*reinterpret_cast<int*>(_a[1])) {
+            default: *reinterpret_cast<int*>(_a[0]) = -1; break;
+            case 0:
+                *reinterpret_cast<int*>(_a[0]) = qRegisterMetaType< GVSSerialPort* >(); break;
+            }
+            break;
+        case 6:
             switch (*reinterpret_cast<int*>(_a[1])) {
             default: *reinterpret_cast<int*>(_a[0]) = -1; break;
             case 0:
@@ -146,13 +160,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

@@ -2,9 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
-
+#include "gvsserialport.h"
 #include "qdevice.h"
 
 QT_BEGIN_NAMESPACE
@@ -33,13 +31,14 @@ private slots:
     void on_StopButton_clicked();
 
     void RemoveDevice(QDevice* device);
+    void RemovePort(GVSSerialPort* port);
     void DetectStimEnd();
     void FindTargetPort(QDevice* device);
 
 private:
     Ui::MainWindow *ui;
     QList<QDevice*> deviceList;
-    QMap<QString, QSerialPort*> nameToPort;
+    QMap<QString, GVSSerialPort*> nameToPort;
     bool isConnect;
 };
 #endif // MAINWINDOW_H

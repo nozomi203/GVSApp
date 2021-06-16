@@ -1,6 +1,8 @@
 #include "qdevice.h"
+#include "gvsserialport.h"
 #include "mainwindow.h"
 #include <QtCore/QDebug>
+
 
 QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
 {
@@ -170,16 +172,19 @@ void QDevice::SetID(int id){
                        - BOX_MARGIN * (max_column - 1)) / 2;
     this->move(margin_left + (BOX_WIDTH + BOX_MARGIN) * column, MainWindow::MARGIN_TOP + (BOX_HEIGHT + BOX_MARGIN) * row);
 }
-void QDevice::SetPort(QSerialPort* serialPort){
+void QDevice::SetPort(GVSSerialPort* serialPort){
+    if(port != nullptr){
+        port->RemoveDevice(this);
+    }
     port = serialPort;
+    if(port != nullptr){
+        port->AddDevice(this);
+    }
     UpdatePortLabel();
     SetIsAvailable(false);
     if(IsPortExist()){
         //デバイスの状態を確認
         AskDeviceState();
-        connect(port, &QSerialPort::readyRead, this, [=]{
-            ReceiveDeviceState();
-        });
     }
 }
 
@@ -283,14 +288,10 @@ void QDevice::AskDeviceState(){
     //Cはマジックナンバー
     port->write("C", 1);
 }
-void QDevice::ReceiveDeviceState(){
-    if(sender() == port){
-        QString data = port->readAll();
-        qDebug() << "Received: " << data;
-        if(data == QString::number(Channel())){
-            qDebug() << "Device is alive.";
-            SetIsAvailable(true);
-        }
+void QDevice::ReceiveDeviceState(QString data){
+    if(data == QString::number(Channel())){
+        qDebug() << "Device is alive.";
+        SetIsAvailable(true);
     }
 }
 

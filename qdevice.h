@@ -10,8 +10,8 @@
 #include <QComboBox>
 #include <QTimer>
 
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
+//#include "gvsserialport.h"
+class GVSSerialPort;
 
 class QDevice : public QGroupBox
 {
@@ -19,8 +19,9 @@ class QDevice : public QGroupBox
 public:
     explicit QDevice(int deviceID, QWidget *parent = nullptr);
     void SetID(int id);
-    void SetPort(QSerialPort* serialPort);
+    void SetPort(GVSSerialPort* serialPort);
     void SetRemoveButtonCallback(void (*callback)());
+    void ReceiveDeviceState(QString data);
     void RemoveDevice();
     void Connect();
     void Disconnect();
@@ -81,7 +82,6 @@ private:
     void UpdatePortLabel();
     void SetIsAvailable(bool b);
     void AskDeviceState();
-    void ReceiveDeviceState();
     void SendGVSParam(int current, int frequency, int waveForm, int transitionDuration, int transitionForm);
     void SendGVSParam();
 
@@ -111,7 +111,7 @@ private:
     QLabel* stimulateStateLabel;
 
     int channel;
-    QSerialPort* port;
+    GVSSerialPort* port;
     int current;
     int frequency;
     int stimDuration;
