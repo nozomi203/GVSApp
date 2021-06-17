@@ -21,7 +21,7 @@ public:
     void SetID(int id);
     void SetPort(GVSSerialPort* serialPort);
     void SetRemoveButtonCallback(void (*callback)());
-    void ReceiveDeviceState(QString data);
+    //void ReceiveDeviceState(QString data);
     void RemoveDevice();
     void Connect();
     void Disconnect();
@@ -36,7 +36,7 @@ public:
     int TransitionForm();
 
     bool IsStimulate();
-    bool IsAvailable();
+    //bool IsAvailable();
     bool IsPortExist();
 
     //ウィンドウサイズ
@@ -80,8 +80,8 @@ signals:
 private:
     void SetStimulateState(bool isStimulate);
     void UpdatePortLabel();
-    void SetIsAvailable(bool b);
-    void AskDeviceState();
+    //void SetIsAvailable(bool b);
+    //void AskDeviceState();
     void SendGVSParam(int current, int frequency, int waveForm, int transitionDuration, int transitionForm);
     void SendGVSParam();
 
@@ -106,7 +106,7 @@ private:
     QLabel* transitionFormLabel;
 
     QLabel* portErrorLabel;
-    QLabel* portAvailableLabel;
+    //QLabel* portAvailableLabel;
 
     QLabel* stimulateStateLabel;
 
@@ -120,7 +120,7 @@ private:
     int transitionForm;
 
     bool isStimulate;
-    bool isAvailable;
+    //bool isAvailable;
 
     QTimer* stimTimer;
 };

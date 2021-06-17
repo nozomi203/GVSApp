@@ -105,6 +105,7 @@ void loop()
       ConvertChtoBin(Dat1,Dat2, Dat3, Dat4, Dat5);
     }
     if(Dat0 == 67){
+      delay(g_Ch);
       Serial1.print(g_Ch);
     }
   }
@@ -157,6 +158,7 @@ void ConvertChtoBin(char dat1, char dat2, char dat3, char dat4, char dat5)
         if((dat2 & 0x02) != 0) current = current + 1;
 
         g_Val = (int) (current / 16);
+
         if((dat2 & 0x01) != 0) frequency = frequency + 512;
         if((dat3 & 0x80) != 0) frequency = frequency + 256;
         if((dat3 & 0x40) != 0) frequency = frequency + 128;

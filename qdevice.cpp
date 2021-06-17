@@ -31,7 +31,7 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     transitionFormLabel = new QLabel(this);
 
     portErrorLabel = new QLabel(this);
-    portAvailableLabel = new QLabel(this);
+    //portAvailableLabel = new QLabel(this);
     stimulateStateLabel = new QLabel(this);
 
     //移動
@@ -66,7 +66,7 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     waveFormLabel->setGeometry(10, 220, 110, 15);
     transitionDurationLabel->setGeometry(10, 250, 110, 15);
     transitionFormLabel->setGeometry(10, 280, 110,15);
-    portAvailableLabel->setGeometry(10, 310, 110, 15);
+    //portAvailableLabel->setGeometry(10, 310, 110, 15);
     //ComboBoxの初期化
     foreach(auto waveForm, WaveFormMap.keys()){
         waveFormComboBox->addItem(waveForm);
@@ -77,7 +77,7 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
 
     //最初は無刺激
     SetStimulateState(false);
-    SetIsAvailable(false);
+    //SetIsAvailable(false);
 
     //コールバック設定
     qDebug() << "Set callback";
@@ -87,8 +87,8 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     connect(channelSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, [=](int value){
         if(IsStimulate()) Disconnect();
         channel = value;
-        SetIsAvailable(false);
-        AskDeviceState();
+        //SetIsAvailable(false);
+        //AskDeviceState();
     });
     connect(portNameLineEdit, &QLineEdit::textChanged, this, [=]{
         if(IsStimulate()) Disconnect();
@@ -146,11 +146,11 @@ QDevice::QDevice(int deviceID, QWidget *parent) : QGroupBox(parent)
     transitionDurationLabel->setText("Transition:");
     transitionFormLabel->setText("TransitionForm:");
 
-    portAvailableLabel->setText("No device.");
+    //portAvailableLabel->setText("No device.");
     portErrorLabel->setText("Port doesn't exist.");
     QPalette palette = portErrorLabel->palette();
     palette.setColor(QPalette::Foreground, QColor("#FF0000"));
-    portAvailableLabel->setPalette(palette);
+    //portAvailableLabel->setPalette(palette);
     portErrorLabel->setPalette(palette);
 
     //タイマー作成
@@ -181,11 +181,11 @@ void QDevice::SetPort(GVSSerialPort* serialPort){
         port->AddDevice(this);
     }
     UpdatePortLabel();
-    SetIsAvailable(false);
-    if(IsPortExist()){
+    //SetIsAvailable(false);
+    //if(IsPortExist()){
         //デバイスの状態を確認
-        AskDeviceState();
-    }
+        //AskDeviceState();
+    //}
 }
 
 void QDevice::RemoveDevice(){
@@ -198,7 +198,7 @@ void QDevice::RemoveDevice(){
 }
 
 void QDevice::Connect(){
-    if(isAvailable){
+    if(IsPortExist()){
         qDebug() << PortName() << "Connect.";
         SetStimulateState(true);
         //刺激開始
@@ -243,9 +243,11 @@ int QDevice::TransitionForm(){
 bool QDevice::IsStimulate(){
     return isStimulate;
 }
+/*
 bool QDevice::IsAvailable(){
     return isAvailable;
 }
+*/
 bool QDevice::IsPortExist(){
     return port != nullptr && port->isOpen();
 }
@@ -257,6 +259,7 @@ void QDevice::UpdatePortLabel(){
     }
 }
 
+/*
 void QDevice::SetIsAvailable(bool b){
     isAvailable = b;
     if(isAvailable){
@@ -265,6 +268,7 @@ void QDevice::SetIsAvailable(bool b){
         portAvailableLabel->show();
     }
 }
+*/
 
 void QDevice::SetStimulateState(bool b){
     isStimulate = b;
@@ -281,6 +285,7 @@ void QDevice::SetStimulateState(bool b){
     stimulateStateLabel->setPalette(palette);
 }
 
+/*
 void QDevice::AskDeviceState(){
     if(!IsPortExist()) return;
     //安否確認
@@ -288,12 +293,15 @@ void QDevice::AskDeviceState(){
     //Cはマジックナンバー
     port->write("C", 1);
 }
+*/
+/*
 void QDevice::ReceiveDeviceState(QString data){
     if(data == QString::number(Channel())){
         qDebug() << "Device is alive.";
-        SetIsAvailable(true);
+        //SetIsAvailable(true);
     }
 }
+*/
 
 void QDevice::SendGVSParam(){
     SendGVSParam(Current(), Frequency(), WaveForm(), TransitionDuration(), TransitionForm());

@@ -86,7 +86,7 @@ void MainWindow::Connect(){
     qDebug() << "Connect.";
 
     foreach(auto &dev, deviceList){
-        if(dev->IsAvailable()){
+        if(dev->IsPortExist()){
             isConnect = true;
             qDebug() << "Connect.";
             dev->Connect();
@@ -100,7 +100,7 @@ void MainWindow::Disconnect(){
 
     //デバイスの停止
     foreach(auto &dev, deviceList){
-        if(dev->IsAvailable()){
+        if(dev->IsPortExist()){
             dev->Disconnect();
         }
     }

@@ -5,9 +5,11 @@
 GVSSerialPort::GVSSerialPort(const QSerialPortInfo &info)
     :QSerialPort(info)
 {
+
     connect(this, &QSerialPort::readyRead, this, [=]{
         DistributeReceivedData();
     });
+
 }
 
 void GVSSerialPort::AddDevice(QDevice* device)
@@ -31,12 +33,10 @@ void GVSSerialPort::RemoveDevice(QDevice* device)
     }
 }
 
+
 void GVSSerialPort::DistributeReceivedData(){
     if(sender() == this){
         QString data = this->readAll();
         qDebug() << "Received: " << data;
-        for(auto dev : deviceList){
-            dev->ReceiveDeviceState(data);
-        }
     }
 }
